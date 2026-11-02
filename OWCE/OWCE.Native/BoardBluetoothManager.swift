@@ -138,7 +138,14 @@ final class BoardBluetoothManager: NSObject, ObservableObject {
         case CBUUID(string: "E659F31B-EA98-11E3-AC10-0800200C9A66"):
             if let firmwareRevision, firmwareRevision >= 4141 {
                 let cellID = (raw & 0xF000) >> 12
-                batteryCellVoltages[cellID] = Double(raw & 0x0FFF) * 0.0011
+                // Pint, Pint X, and XR packs expose 15 valid series cells
+                // (IDs 0...14). The legacy client explicitly ignores ID 15;
+                // newer firmware can still report that sentinel with a tiny
+                // voltage, which must not be presented as a real cell.
+                let has15SeriesCells = hardwareRevision.map { (4000..<6000).contains($0) || (7000..<8000).contains($0) } ?? false
+                if !has15SeriesCells || cellID < 15 {
+                    batteryCellVoltages[cellID] = Double(raw & 0x0FFF) * 0.0011
+                }
             } else {
                 batteryCellVoltages[second] = Double(first) * 0.02
             }

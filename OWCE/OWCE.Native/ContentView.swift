@@ -6,9 +6,7 @@ struct ContentView: View {
     @EnvironmentObject private var rideRecorder: RideRecorder
     @EnvironmentObject private var watchBridge: WatchConnectivityBridge
     @AppStorage("owce.metricDisplay") private var metricDisplay = false
-    @AppStorage("owce.autoRideRecording") private var autoRideRecording = false
-    @State private var selectedRideMode: (name: String, value: Int)?
-    @State private var showingRideModeConfirmation = false
+    @State private var selectedRideMode: RideModeSelection?
 
     var body: some View {
         TabView {
@@ -34,13 +32,10 @@ struct ContentView: View {
             .background(Color(red: 0.055, green: 0.067, blue: 0.082).ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .onChange(of: bluetooth.speed) { _, speed in rideRecorder.updateMaximumSpeed(speed) }
-            .confirmationDialog("Change ride mode?", isPresented: $showingRideModeConfirmation, titleVisibility: .visible) {
-                if let selectedRideMode {
-                    Button("Change to \(selectedRideMode.name)") { bluetooth.changeRideMode(to: selectedRideMode.value) }
+            .sheet(item: $selectedRideMode) { mode in
+                RideModeInfoSheet(modeName: mode.name, boardType: bluetooth.boardType) {
+                    bluetooth.changeRideMode(to: mode.value)
                 }
-                Button("Cancel", role: .cancel) { selectedRideMode = nil }
-            } message: {
-                Text("Only change ride mode while stopped. Verify the board display before riding.")
             }
           }
           .tabItem { Label("Board", systemImage: "speedometer") }
@@ -59,11 +54,6 @@ struct ContentView: View {
             publishToWatch()
         }
         .onChange(of: bluetooth.connectedBoard?.identifier) { _, identifier in
-            if identifier != nil, autoRideRecording, !rideRecorder.isRecording {
-                rideRecorder.start(currentSpeedMph: bluetooth.speed)
-            } else if identifier == nil, autoRideRecording, rideRecorder.isRecording {
-                rideRecorder.stop(currentSpeedMph: bluetooth.speed)
-            }
             publishToWatch(force: true)
         }
     }
@@ -145,8 +135,7 @@ struct ContentView: View {
                             HStack(spacing: 8) {
                                 ForEach(bluetooth.rideModes, id: \.value) { mode in
                                     Button {
-                                        selectedRideMode = mode
-                                        showingRideModeConfirmation = true
+                                        selectedRideMode = RideModeSelection(name: mode.name, value: mode.value)
                                     } label: {
                                         Text(mode.name)
                                             .font(.subheadline.weight(.semibold))
@@ -269,5 +258,171 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading).padding(14)
         .background(.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 14))
+    }
+}
+
+private struct RideModeSelection: Identifiable {
+    let name: String
+    let value: Int
+    var id: Int { value }
+}
+
+private struct RideModeInfoSheet: View {
+    let modeName: String
+    let boardType: String
+    let onSelect: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("owce.metricDisplay") private var metricDisplay = false
+
+    private var summary: String {
+        let summaries: [String: String] = [
+            "Redwood": "A mellow, forgiving Pint profile for relaxed cruising.",
+            "Pacific": "A balanced all-around Pint profile for everyday riding.",
+            "Elevated": "A nose-up stance that can help on climbs and uneven terrain.",
+            "Skyline": "The most responsive, performance-oriented Pint profile.",
+            "Sequoia": "A mellow, lower-speed profile for relaxed riding.",
+            "Cruz": "A relaxed profile intended for casual cruising.",
+            "Mission": "A balanced, versatile profile for everyday riding.",
+            "Delirium": "A more assertive, responsive profile for experienced riders.",
+            "Bay": "A mellow GT profile for relaxed cruising.",
+            "Roam": "A smooth, easygoing GT profile for casual rides.",
+            "Flow": "A balanced GT profile focused on fluid everyday riding.",
+            "Highline": "A sportier, more responsive GT profile.",
+            "Apex": "An assertive, performance-oriented GT profile.",
+            "Custom": "A customizable profile; its exact feel depends on your board's configuration.",
+            "Classic": "A standard, balanced profile for the original Onewheel.",
+            "Extreme": "A more assertive profile for experienced riders."
+        ]
+        return summaries[modeName] ?? "Ride profile characteristics depend on the board model and firmware."
+    }
+
+    private var characteristics: [String] {
+        switch modeName {
+        case "Redwood": ["Gentler response", "Lower-speed character", "Good for relaxed rides"]
+        case "Pacific": ["Balanced response", "Versatile for general cruising", "More lively than Redwood"]
+        case "Elevated": ["More nose-up board angle", "Useful on inclines", "May feel different on level ground"]
+        case "Skyline", "Delirium", "Apex", "Extreme": ["Sharper, more assertive feel", "Intended for confident riders", "Keep a generous safety margin"]
+        case "Sequoia": ["Mellow response", "Lower-speed character", "Calmer cruising option"]
+        case "Cruz", "Bay", "Roam": ["Easygoing response", "Relaxed cruising character", "A calmer profile"]
+        case "Mission", "Flow", "Classic": ["Balanced, general-purpose feel", "Versatile for everyday riding", "A good all-around profile"]
+        case "Highline": ["Sportier response", "More assertive ride feel", "Leave room for terrain and battery changes"]
+        case "Custom": ["Characteristics vary with custom settings", "Check the board configuration", "Start cautiously after changes"]
+        default: ["Characteristics vary by board and firmware", "Start cautiously with an unfamiliar profile"]
+        }
+    }
+
+    private var advertisedMaxSpeedMPH: Int? {
+        switch (boardType, modeName) {
+        case ("Pint", "Redwood"), ("Pint X", "Redwood"): 12
+        case ("Pint", "Pacific"), ("Pint", "Elevated"), ("Pint", "Skyline"): 16
+        case ("Pint X", "Pacific"), ("Pint X", "Elevated"), ("Pint X", "Skyline"): 18
+        case ("XR", "Sequoia"), ("Plus", "Sequoia"): 12
+        case ("XR", "Cruz"), ("Plus", "Cruz"): 15
+        case ("XR", "Mission"), ("XR", "Elevated"), ("XR", "Delirium"), ("XR", "Custom"),
+             ("Plus", "Mission"), ("Plus", "Elevated"), ("Plus", "Delirium"), ("Plus", "Custom"): 19
+        case ("V1", "Classic"): 12
+        case ("V1", "Extreme"), ("V1", "Elevated"): 15
+        default: nil
+        }
+    }
+
+    private var feelRange: (lower: CGFloat, upper: CGFloat) {
+        let ranges: [String: (CGFloat, CGFloat)] = [
+            "Redwood": (0.04, 0.28), "Sequoia": (0.06, 0.30), "Cruz": (0.18, 0.43),
+            "Bay": (0.17, 0.43), "Roam": (0.22, 0.49), "Pacific": (0.31, 0.59),
+            "Mission": (0.37, 0.66), "Flow": (0.37, 0.65), "Classic": (0.34, 0.65),
+            "Elevated": (0.40, 0.73), "Highline": (0.59, 0.86), "Skyline": (0.74, 0.98),
+            "Delirium": (0.73, 0.97), "Apex": (0.77, 0.99), "Extreme": (0.70, 0.95),
+            "Custom": (0.30, 0.72)
+        ]
+        let range = ranges[modeName] ?? (0.30, 0.70)
+        return (range.0, range.1)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Capsule().fill(.white.opacity(0.25)).frame(width: 38, height: 5).frame(maxWidth: .infinity).padding(.top, 10)
+            HStack(spacing: 12) {
+                Image(systemName: "speedometer").font(.title2.weight(.semibold)).foregroundStyle(.cyan)
+                    .frame(width: 48, height: 48).background(.cyan.opacity(0.14), in: RoundedRectangle(cornerRadius: 14))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(modeName).font(.title2.bold())
+                    Text(boardType).font(.caption.weight(.medium)).foregroundStyle(.secondary)
+                }
+            }
+            Text(summary).font(.subheadline).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("RIDE FEEL").font(.caption2.weight(.bold)).tracking(0.8).foregroundStyle(.secondary)
+                    Spacer()
+                    Text("Qualitative guide").font(.caption2).foregroundStyle(.tertiary)
+                }
+                GeometryReader { geometry in
+                    let inset: CGFloat = 9
+                    let usableWidth = max(0, geometry.size.width - inset * 2)
+                    let startX = inset + usableWidth * feelRange.lower
+                    let bandWidth = usableWidth * (feelRange.upper - feelRange.lower)
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(.white.opacity(0.14)).frame(height: 6).padding(.horizontal, inset)
+                        Capsule()
+                            .fill(LinearGradient(colors: [.cyan, .yellow, .orange], startPoint: .leading, endPoint: .trailing))
+                            .frame(width: bandWidth, height: 8)
+                            .offset(x: startX)
+                        HStack(spacing: 0) {
+                            Rectangle().fill(.white.opacity(0.9)).frame(width: 2, height: 15)
+                            Spacer(minLength: 0)
+                            Rectangle().fill(.white.opacity(0.9)).frame(width: 2, height: 15)
+                        }
+                        .frame(width: bandWidth)
+                        .offset(x: startX)
+                    }
+                    .frame(maxHeight: .infinity)
+                }
+                .frame(height: 20)
+                HStack {
+                    Text("Mellow / forgiving")
+                    Spacer()
+                    Text("More aggressive")
+                }
+                .font(.caption2.weight(.medium)).foregroundStyle(.secondary)
+                Text("Relative character only—not a safety rating or recommended speed.")
+                    .font(.caption2).foregroundStyle(.tertiary)
+            }
+            .padding(13)
+            .background(.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 14))
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: "speedometer").font(.title3).foregroundStyle(.cyan)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("MODE MAX SPEED").font(.caption2.weight(.bold)).tracking(0.7).foregroundStyle(.secondary)
+                    Text("Published mode maximum; not a safe riding target.").font(.caption2).foregroundStyle(.tertiary)
+                }
+                Spacer(minLength: 4)
+                if let advertisedMaxSpeedMPH {
+                    Text(String(format: metricDisplay ? "%.0f km/h" : "%d mph", metricDisplay ? Double(advertisedMaxSpeedMPH) * 1.60934 : Double(advertisedMaxSpeedMPH)))
+                        .font(.title3.bold().monospacedDigit())
+                } else {
+                    Text("—").font(.title3.bold()).foregroundStyle(.secondary)
+                }
+            }
+            .padding(13)
+            .background(.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 14))
+            VStack(alignment: .leading, spacing: 11) {
+                ForEach(characteristics, id: \.self) { item in
+                    Label(item, systemImage: "checkmark.circle.fill").font(.subheadline)
+                }
+            }
+            Label("Only switch while stopped. Ride modes do not guarantee a safe speed.", systemImage: "exclamationmark.triangle.fill")
+                .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 12) {
+                Button("Cancel") { dismiss() }.buttonStyle(.bordered).frame(maxWidth: .infinity)
+                Button("Select \(modeName)") { onSelect(); dismiss() }
+                    .buttonStyle(.borderedProminent).tint(.cyan).foregroundStyle(.black).frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, 22).padding(.bottom, 22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.hidden)
+        .presentationBackground(Color(red: 0.055, green: 0.067, blue: 0.082))
     }
 }

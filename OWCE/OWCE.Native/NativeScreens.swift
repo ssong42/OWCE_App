@@ -410,7 +410,6 @@ struct BoardDetailsScreen: View {
 
 struct AppSettingsScreen: View {
     @AppStorage("owce.metricDisplay") private var metricDisplay = false
-    @AppStorage("owce.autoRideRecording") private var autoRideRecording = false
 
     var body: some View {
         Form {
@@ -418,8 +417,7 @@ struct AppSettingsScreen: View {
                 Toggle("Metric units (km/h, km)", isOn: $metricDisplay)
             }
             Section("RECORDING") {
-                Toggle("Automatically record while connected", isOn: $autoRideRecording)
-                Text("Automatic recording starts when you connect to a board and saves when you disconnect. Location permission is required for distance and route tracking.")
+                Text("Rides start only when you tap Start ride recording on the Board tab. Location permission is required for distance and route tracking.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("PRIVACY") {

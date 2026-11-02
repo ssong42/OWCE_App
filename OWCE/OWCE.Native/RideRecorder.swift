@@ -57,6 +57,7 @@ final class RideRecorder: NSObject, ObservableObject, @preconcurrency CLLocation
     private var activeRawEvents: [RideRawEvent] = []
     private var activeRoute: [RideLocation] = []
     private var lastSampleAt: Date?
+    private var pendingStartAfterAuthorization = false
     override init() {
         super.init()
         locationManager.delegate = self
@@ -72,13 +73,16 @@ final class RideRecorder: NSObject, ObservableObject, @preconcurrency CLLocation
         }
         if locationManager.authorizationStatus == .notDetermined {
             locationStatus = "Allow location access to record rides."
+            pendingStartAfterAuthorization = true
             locationManager.requestWhenInUseAuthorization()
             return
         }
         guard locationManager.authorizationStatus == .authorizedAlways || locationManager.authorizationStatus == .authorizedWhenInUse else {
+            pendingStartAfterAuthorization = false
             locationStatus = "Allow location access in Settings to record rides."
             return
         }
+        pendingStartAfterAuthorization = false
         startedAt = Date()
         previousLocation = nil
         distanceMeters = 0
@@ -139,8 +143,12 @@ final class RideRecorder: NSObject, ObservableObject, @preconcurrency CLLocation
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         locationAvailable = manager.authorizationStatus == .authorizedAlways || manager.authorizationStatus == .authorizedWhenInUse
-        if locationAvailable, startedAt == nil { start(currentSpeedMph: nil) }
+        if locationAvailable, pendingStartAfterAuthorization, startedAt == nil {
+            pendingStartAfterAuthorization = false
+            start(currentSpeedMph: nil)
+        }
         if !locationAvailable && (manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted) {
+            pendingStartAfterAuthorization = false
             locationStatus = "Allow location access in Settings to record rides."
         }
     }
