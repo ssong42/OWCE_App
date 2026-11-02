@@ -194,7 +194,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = KFZQ4DY4N6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = OWCE.Native/Info.plist;
 				MARKETING_VERSION = 1.0;
@@ -212,7 +211,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = KFZQ4DY4N6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = OWCE.Native/Info.plist;
 				MARKETING_VERSION = 1.0;
@@ -224,8 +222,8 @@
 			};
 			name = Release;
 		};
-		F10000000000000000000007 /* Watch Debug */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CODE_SIGN_STYLE = Automatic; DEVELOPMENT_TEAM = KFZQ4DY4N6; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = OWCE; INFOPLIST_KEY_WKApplication = YES; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.owcommunity.owce.native; PRODUCT_BUNDLE_IDENTIFIER = com.owcommunity.owce.native.watchkitapp; PRODUCT_NAME = OWCEWatch; SDKROOT = watchos; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "watchos watchsimulator"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Debug; };
-		F10000000000000000000008 /* Watch Release */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CODE_SIGN_STYLE = Automatic; DEVELOPMENT_TEAM = KFZQ4DY4N6; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = OWCE; INFOPLIST_KEY_WKApplication = YES; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.owcommunity.owce.native; PRODUCT_BUNDLE_IDENTIFIER = com.owcommunity.owce.native.watchkitapp; PRODUCT_NAME = OWCEWatch; SDKROOT = watchos; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "watchos watchsimulator"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Release; };
+		F10000000000000000000007 /* Watch Debug */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = OWCE; INFOPLIST_KEY_WKApplication = YES; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.owcommunity.owce.native; PRODUCT_BUNDLE_IDENTIFIER = com.owcommunity.owce.native.watchkitapp; PRODUCT_NAME = OWCEWatch; SDKROOT = watchos; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "watchos watchsimulator"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Debug; };
+		F10000000000000000000008 /* Watch Release */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = OWCE; INFOPLIST_KEY_WKApplication = YES; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.owcommunity.owce.native; PRODUCT_BUNDLE_IDENTIFIER = com.owcommunity.owce.native.watchkitapp; PRODUCT_NAME = OWCEWatch; SDKROOT = watchos; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "watchos watchsimulator"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */

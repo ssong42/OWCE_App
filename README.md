@@ -1,59 +1,30 @@
-Onewheel Community Edition (OWCE) App
-===========
+# OWCE for iOS
 
-A cross-platform app for use with the [Onewheel](https://onewheel.com/) V1, Plus, XR, Pint, Pint X and GT.
+Onewheel Community Edition (OWCE) is an independent SwiftUI app for connecting to Onewheel boards over Bluetooth Low Energy. This fork focuses on the native iOS app; the Android and legacy Xamarin projects have been removed. A native watchOS dashboard target is included for Apple Watch users.
 
-NOTE: GT support requires patching with [Rewheel](https://github.com/rewheel-app/rewheel).
-The newer board firmware no longer sends through voltage, as Future Motion removed it. Those versions are:
-- XR with firmware 4155 and higher
-- Pint with firmware 5059 and higher
-_ Pint X, all firmware
-- GT, all firmware
+> OWCE is not endorsed by, affiliated with, or a replacement for Future Motion or the official Onewheel app. Ride within your ability, wear appropriate protective equipment, and respect all pushback and safety alerts.
 
-NOTE: Onewheel Community Edition app is not endorsed by or affiliated with Future Motion in any way.
+## Features
 
-Written in C# with [Xamarin](http://www.xamarin.com)
+- Board discovery, connection, live telemetry, and board details
+- Ride-mode selection and mode information
+- Manual GPS and BLE ride recording, ride history, logs, and CSV export
+- Ride submission with serial-number removal enabled by default
+- Metric/imperial display settings
+- Optional Apple Watch dashboard using WatchConnectivity
 
-Open Source Project by [@beeradmoore](http://www.twitter.com/beeradmoore) 
+The native port is still in progress. Board-specific behavior and ride-mode writes need broader physical-device testing. **Pint firmware 5040 (hardware revision 5312) has been tested** for BLE connection and telemetry. Other board and firmware combinations are not equally validated. Some firmware may not expose battery voltage or other values. The app does not patch board firmware; use of firmware modification tools is outside this project’s scope.
 
-## Available (soon) for free on:
-* Android and WearOS: Available on Google Play
-* iPhone and Apple Watch: Available on App Store
+## Build and run locally
 
-## How to build and run this project. 
+See [Local iOS build and testing guide](HOW_TO_RUN_LOCALLY.md) for Xcode setup, signing, device permissions, and BLE testing.
 
-### Native iPhone app (Xcode)
+Quick start: open `OWCE/OWCE.xcodeproj`, select the **OWCE** scheme, select an iPhone destination, configure your Apple development team under Signing & Capabilities, and run. A physical iPhone is required to connect to a board; the simulator is suitable only for UI/build checks.
 
-The native SwiftUI iPhone and watch rebuild is in `OWCE/OWCE.xcodeproj`, `OWCE/OWCE.Native/`, and `OWCE/OWCE.Watch/`. Open the Xcode project and select the **OWCE** scheme for iPhone or **OWCEWatch** for Apple Watch. Choose the corresponding connected device and select your Apple developer team under **Signing & Capabilities**. BLE board discovery requires a physical iPhone; the simulator cannot connect to a Onewheel. The watch app receives live data from the phone over WatchConnectivity.
+## Project contents
 
-The native apps include Onewheel BLE discovery/connection, board telemetry and details, ride-mode controls, local GPS/raw BLE ride recording, ride history and logs, CSV export, ride submission with serial-number redaction, settings, and a live Apple Watch dashboard. This is still a port in progress and the features need testing against a real board and paired watch. The Android and legacy Xamarin projects remain unchanged.
+- `OWCE/OWCE.xcodeproj` — Xcode project
+- `OWCE/OWCE.Native/` — SwiftUI iPhone app
+- `OWCE/OWCE.Watch/` — native watchOS dashboard source and target
 
-Before you start, you will need to install both Visual Studio and Xamarin. If you are using Windows you will want Visual Studio 2017 ([install guide here](https://docs.microsoft.com/en-us/xamarin/cross-platform/get-started/installation/windows)) or if you are on macOS you will want Visual Studio for Mac ([install guide here](https://docs.microsoft.com/en-us/visualstudio/mac/installation)).
-
-Using your flavor of Visual Studio, open OWCE.sln. From the platform dropdown, choose OWCE.iOS or OWCE.Android, depending on what platform you wish to build for. Then, deploy and debug your app like any other project.
-
-NOTE: Because the app depends on the Onewheels low-energy Bluetooth, it will not function correctly in a simulator/emulator. For best results, deploy to a physical device. 
-
-
-
-## Frequently (or not so frequently) Asked Questions
-
-### Why did you create this?
-
-There are quite a number of members on the [Onewheel Owners Facebook group](https://www.facebook.com/groups/onewheelownersgroup/) that, for one reason or another, don't like the stock app by Future Motion. I figured, why not create an app with its development shaped by features that the community wants?
-
-### Do other third-party apps already exist?
-
-Yes, but Future Motion's firmware lockdowns prohibit them from being used. Such as pOnewheel[https://github.com/ponewheel/android-ponewheel] (deprecated) for Android and Float Deck (obsolete) for iOS. However, the problem is that one is for Android, and the other is for iOS. Wouldn't it be better if there was just 1 app with the exact same feature sets shared across both platforms?
-
-### Does this change how my Onewheel performs?
-
-No. This app uses the same Bluetooth low energy (BLE) interface that the official Onewheel app uses to read and display various stats.
-
-### What Onewheels are supported?
-
-Currently, v1, Plus, XR, and Pint. Pint X and GT have not yet been thoroughly tested.
-
-### Will using this app void my warranty?
-
-Although things such as riding your board without a helmet can void your warranty, we don't believe that using third-party apps will void your warranty.
+Ride data is stored locally on the iPhone. Location permission is needed for GPS route and distance recording. Review exported or submitted data before sharing it.
