@@ -22,6 +22,12 @@ Open Source Project by [@beeradmoore](http://www.twitter.com/beeradmoore)
 
 ## How to build and run this project. 
 
+### Native iPhone app (Xcode)
+
+The native SwiftUI iPhone and watch rebuild is in `OWCE/OWCE.xcodeproj`, `OWCE/OWCE.Native/`, and `OWCE/OWCE.Watch/`. Open the Xcode project and select the **OWCE** scheme for iPhone or **OWCEWatch** for Apple Watch. Choose the corresponding connected device and select your Apple developer team under **Signing & Capabilities**. BLE board discovery requires a physical iPhone; the simulator cannot connect to a Onewheel. The watch app receives live data from the phone over WatchConnectivity.
+
+The native apps include Onewheel BLE discovery/connection, board telemetry and details, ride-mode controls, local GPS/raw BLE ride recording, ride history and logs, CSV export, ride submission with serial-number redaction, settings, and a live Apple Watch dashboard. This is still a port in progress and the features need testing against a real board and paired watch. The Android and legacy Xamarin projects remain unchanged.
+
 Before you start, you will need to install both Visual Studio and Xamarin. If you are using Windows you will want Visual Studio 2017 ([install guide here](https://docs.microsoft.com/en-us/xamarin/cross-platform/get-started/installation/windows)) or if you are on macOS you will want Visual Studio for Mac ([install guide here](https://docs.microsoft.com/en-us/visualstudio/mac/installation)).
 
 Using your flavor of Visual Studio, open OWCE.sln. From the platform dropdown, choose OWCE.iOS or OWCE.Android, depending on what platform you wish to build for. Then, deploy and debug your app like any other project.

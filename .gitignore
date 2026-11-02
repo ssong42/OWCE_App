@@ -1,5 +1,7 @@
 bin/
 obj/
+OWCE/build/
+**/xcuserdata/
 .vs/
 .idea/
 .mfractor/

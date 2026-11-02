@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key><string>OWCE</string>
+	<key>NSBluetoothAlwaysUsageDescription</key><string>OWCE uses Bluetooth to connect to your Onewheel and display ride data.</string>
+	<key>NSLocationWhenInUseUsageDescription</key><string>OWCE uses your location to record rides.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key><string>OWCE uses your location to record rides, including while the app is in the background.</string>
+	<key>UIBackgroundModes</key><array><string>bluetooth-central</string><string>location</string></array>
+	<key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string></array>
+	<key>UILaunchScreen</key><dict/>
+</dict>
+</plist>
