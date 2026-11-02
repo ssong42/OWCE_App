@@ -296,21 +296,6 @@ private struct RideModeInfoSheet: View {
         return summaries[modeName] ?? "Ride profile characteristics depend on the board model and firmware."
     }
 
-    private var characteristics: [String] {
-        switch modeName {
-        case "Redwood": ["Gentler response", "Lower-speed character", "Good for relaxed rides"]
-        case "Pacific": ["Balanced response", "Versatile for general cruising", "More lively than Redwood"]
-        case "Elevated": ["More nose-up board angle", "Useful on inclines", "May feel different on level ground"]
-        case "Skyline", "Delirium", "Apex", "Extreme": ["Sharper, more assertive feel", "Intended for confident riders", "Keep a generous safety margin"]
-        case "Sequoia": ["Mellow response", "Lower-speed character", "Calmer cruising option"]
-        case "Cruz", "Bay", "Roam": ["Easygoing response", "Relaxed cruising character", "A calmer profile"]
-        case "Mission", "Flow", "Classic": ["Balanced, general-purpose feel", "Versatile for everyday riding", "A good all-around profile"]
-        case "Highline": ["Sportier response", "More assertive ride feel", "Leave room for terrain and battery changes"]
-        case "Custom": ["Characteristics vary with custom settings", "Check the board configuration", "Start cautiously after changes"]
-        default: ["Characteristics vary by board and firmware", "Start cautiously with an unfamiliar profile"]
-        }
-    }
-
     private var advertisedMaxSpeedMPH: Int? {
         switch (boardType, modeName) {
         case ("Pint", "Redwood"), ("Pint X", "Redwood"): 12
@@ -324,6 +309,14 @@ private struct RideModeInfoSheet: View {
         case ("V1", "Extreme"), ("V1", "Elevated"): 15
         default: nil
         }
+    }
+
+    private var maxSpeedLabel: String {
+        guard let advertisedMaxSpeedMPH else { return "—" }
+        if metricDisplay {
+            return String(format: "%.0f km/h", Double(advertisedMaxSpeedMPH) * 1.60934)
+        }
+        return "\(advertisedMaxSpeedMPH) mph"
     }
 
     private var feelRange: (lower: CGFloat, upper: CGFloat) {
@@ -397,20 +390,12 @@ private struct RideModeInfoSheet: View {
                     Text("Published mode maximum; not a safe riding target.").font(.caption2).foregroundStyle(.tertiary)
                 }
                 Spacer(minLength: 4)
-                if let advertisedMaxSpeedMPH {
-                    Text(String(format: metricDisplay ? "%.0f km/h" : "%d mph", metricDisplay ? Double(advertisedMaxSpeedMPH) * 1.60934 : Double(advertisedMaxSpeedMPH)))
-                        .font(.title3.bold().monospacedDigit())
-                } else {
-                    Text("—").font(.title3.bold()).foregroundStyle(.secondary)
-                }
+                Text(maxSpeedLabel)
+                    .font(.title3.bold().monospacedDigit())
+                    .foregroundStyle(advertisedMaxSpeedMPH == nil ? .secondary : .primary)
             }
             .padding(13)
             .background(.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 14))
-            VStack(alignment: .leading, spacing: 11) {
-                ForEach(characteristics, id: \.self) { item in
-                    Label(item, systemImage: "checkmark.circle.fill").font(.subheadline)
-                }
-            }
             Label("Only switch while stopped. Ride modes do not guarantee a safe speed.", systemImage: "exclamationmark.triangle.fill")
                 .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 12) {
